@@ -10,7 +10,7 @@ import java.util.HashMap;
 
 public class FirstSubQuestion extends AppCompatActivity {
     TextView noBtn,yesBtn,message;
-    HashMap<String, String> responses = new HashMap<>();
+    HashMap<String, Object> responses = new HashMap<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -18,13 +18,13 @@ public class FirstSubQuestion extends AppCompatActivity {
         yesBtn = findViewById(R.id.yesButton);
         noBtn = findViewById(R.id.noButton);
         message = findViewById(R.id.message);
-        responses = (HashMap<String, String>)getIntent().getSerializableExtra("response data");
+        responses = (HashMap<String, Object>)getIntent().getSerializableExtra("response data");
 
 
         yesBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                responses.put(message.getText().toString(), "yes");
+                responses.put("pressedRestart", "yes");
                 Intent intent = new Intent(FirstSubQuestion.this, SecondQuestion.class);
                 intent.putExtra("response data", responses);
                 startActivity(intent);
@@ -33,7 +33,7 @@ public class FirstSubQuestion extends AppCompatActivity {
         noBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                responses.put(message.getText().toString(), "no");
+                responses.put("pressedRestart", "no");
                 Intent intent = new Intent(FirstSubQuestion.this, SecondQuestion.class);
                 intent.putExtra("response data", responses);
                 startActivity(intent);

@@ -6,9 +6,9 @@
     android:layout_height="match_parent"
     android:background="#000"
     tools:context=".Feedback">
-
     <LinearLayout
-        android:id="@+id/linearLayout2"
+        android:id="@+id/linearLayout3"
+        android:visibility="visible"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
@@ -17,10 +17,10 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/message"
+            android:id="@+id/messageuserInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Did your headphones stay in for the whole night?"
+            android:text="Did you have any issue with the App?"
             android:textColor="#fff"
             android:gravity="center"
             android:textSize="30dp" />
@@ -29,25 +29,32 @@
             android:layout_marginTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/userResponse"
+                android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:textColor="#D81111"
-                android:text="Yes"
-                android:textSize="20dp"
-                android:gravity="center"
-                android:id="@+id/yesButton"/>
-            <TextView
-                android:id="@+id/noButton"
-                android:layout_width="0dp"
+                android:layout_marginBottom="10dp"
                 android:layout_weight="1"
-                android:layout_height="50dp"
-                android:textColor="#1B32BD"
+                android:background="#ffff"
                 android:gravity="center"
+                android:inputType="text"
+                android:text=""
+                android:textColor="#000"
+                android:textSize="20dp" />
+            <Button
+
+                android:id="@+id/submit"
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+
+                android:layout_height="wrap_content"
+
+                android:gravity="center"
+                android:background="@drawable/button_design"
                 android:textSize="20dp"
-                android:text="No"/>
+                android:text="Submit"/>
         </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

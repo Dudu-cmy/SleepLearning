@@ -11,6 +11,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".FifthQuestion"></activity>
+        <activity android:name=".FourthQuestion" />
         <activity android:name=".InstructionsViewController">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -19,8 +21,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".ThirdQuestion" />
-        <activity android:name=".SecondSubsub"
-            />
+        <activity android:name=".SecondSubsub" />
         <activity android:name=".SecondSubtwo" />
         <activity android:name=".SecondQuestionSub" />
         <activity android:name=".SecondQuestion" />
@@ -28,9 +29,7 @@
         <activity android:name=".FirstQuestion" />
         <activity android:name=".Feedback" />
         <activity android:name=".Session" />
-        <activity android:name=".MainActivity">
-
-        </activity>
+        <activity android:name=".MainActivity" />
     </application>
 
 </manifest>

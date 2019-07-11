@@ -1,6 +1,8 @@
 package com.example.sleeplearning;
 
 import android.content.Intent;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -14,7 +16,7 @@ public class SecondSubsub extends AppCompatActivity {
     Button submit;
     EditText message;
     TextView txt;
-    HashMap<String, String> responses = new HashMap<>();
+    HashMap<String, Object> responses = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,16 +25,30 @@ public class SecondSubsub extends AppCompatActivity {
         submit = findViewById(R.id.submit);
         txt = findViewById(R.id.messageuserInput);
         message = findViewById(R.id.userResponse);
-        responses = (HashMap<String, String>)getIntent().getSerializableExtra("response data");
+        responses = (HashMap<String, Object>)getIntent().getSerializableExtra("response data");
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (message.getText().toString().isEmpty()) {
+                    AlertDialog.Builder alert = new AlertDialog.Builder(SecondSubsub.this);
+                    alert.setTitle("Invalid response");
+                    alert.setMessage("You must enter a response before continuing.");
+                    alert.setPositiveButton("OK",null);
+                    alert.setCancelable(false);
+                    alert.show();
+                }
+                else {
                 String userResponse = "null";
                 userResponse = message.getText().toString();
-                responses.put(txt.getText().toString(),userResponse);
+                if (responses.get("notAwakenedButHeardALanguage").equals("yes")) {
+                    responses.put("languageHeardWhileAsleep", userResponse);
+                }
+                else
+                    responses.put("languageHeardAfterWaking", userResponse);
                 Intent intent = new Intent(SecondSubsub.this, ThirdQuestion.class);
                 intent.putExtra("response data", responses);
                 startActivity(intent);
+            }
             }
         });
     }

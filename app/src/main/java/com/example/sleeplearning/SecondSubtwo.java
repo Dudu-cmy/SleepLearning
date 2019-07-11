@@ -10,7 +10,7 @@ import java.util.HashMap;
 
 public class SecondSubtwo extends AppCompatActivity {
     TextView yesBtn,noBtn,message;
-    HashMap<String, String> responses = new HashMap<>();
+    HashMap<String, Object> responses = new HashMap<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -18,11 +18,11 @@ public class SecondSubtwo extends AppCompatActivity {
         yesBtn = findViewById(R.id.yesButton);
         noBtn = findViewById(R.id.noButton);
         message = findViewById(R.id.message);
-        responses = (HashMap<String, String>)getIntent().getSerializableExtra("response data");
+        responses = (HashMap<String, Object>)getIntent().getSerializableExtra("response data");
         yesBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                responses.put(message.getText().toString(),"yes");
+                responses.put("notAwakenedButHeardALanguage","yes");
                 Intent intent = new Intent(SecondSubtwo.this, SecondSubsub.class);
                 intent.putExtra("response data", responses);
                 startActivity(intent);
@@ -31,7 +31,7 @@ public class SecondSubtwo extends AppCompatActivity {
         noBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                responses.put(message.getText().toString(),"no");
+                responses.put("notAwakenedButHeardALanguage","no");
                 Intent intent = new Intent(SecondSubtwo.this, ThirdQuestion.class);
                 intent.putExtra("response data", responses);
                 startActivity(intent);

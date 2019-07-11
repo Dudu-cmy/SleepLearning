@@ -13,6 +13,11 @@ import android.widget.Chronometer;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.TimeZone;
 
 public class Session extends AppCompatActivity {
     private TextView endSessionButton, restartSessionButton;
@@ -21,10 +26,13 @@ public class Session extends AppCompatActivity {
     public long pauseOffset;
     private String timerLimit;
     private int i = 0;
-
+    private int counter = 0;
+    private int x = 0;
+    private boolean paused = false;
+    HashMap<String, Object> responses = new HashMap<>();
     String url = "https://storage.googleapis.com/sleep-learning-app/audio-files/"; // your URL here
     MediaPlayer mediaPlayer = new MediaPlayer();
-
+    String ocean = "https://storage.googleapis.com/sleep-learning-app/audio-files/ocean.mp3";
 
     String madarinsAudios []={
       "mandarin-1.m4a",
@@ -35,6 +43,11 @@ public class Session extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session);
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Date date = new Date();
+        responses = (HashMap<String, Object>)getIntent().getSerializableExtra("response data");
+        responses.put("timeWhenAsleep",new Date());
         endSessionButton = findViewById(R.id.endSessionTxtView);
         restartSessionButton = findViewById(R.id.restartSessionTxtView);
         timer = findViewById(R.id.chronometer);
@@ -87,7 +100,12 @@ public class Session extends AppCompatActivity {
                 //alertD.setView(promptView);
                 //alertD.setCancelable(false);
                 //alertD.show();
+                DateFormat dateFormats = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                dateFormats.setTimeZone(TimeZone.getTimeZone("UTC"));
+                responses.put("timeWhenAwake",new Date());
+                responses.put("numberOfRestarts",counter);
                 Intent intent = new Intent(Session.this, FirstQuestion.class);
+                intent.putExtra("response data", responses);
                 startActivity(intent);
                 finish();
                 //Intent intent = new Intent(Session.this, MainActivity.class);
@@ -100,12 +118,16 @@ public class Session extends AppCompatActivity {
         restartSessionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startTimer(v);
+
                 if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.stop();
+                    counter++;
+                    startTimer(v);
+                    x = mediaPlayer.getCurrentPosition();
+                    mediaPlayer.pause();
+                    paused = true;
                     timerLimit = "20:00";
-                    mediaPlayer.release();
-                    mediaPlayer = null;
+                    //mediaPlayer.release();
+                    //mediaPlayer = null;
                 }
             }
         });
@@ -134,14 +156,22 @@ public class Session extends AppCompatActivity {
     }
     public void playmusic ()
     {
-            i = 0;
+        if(paused)
+        {
+            paused =false;
+            mediaPlayer.seekTo(x);
+            mediaPlayer.start();
+
+        }
+        else {
+            i = -1;
 
             if (mediaPlayer == null)
                 mediaPlayer = new MediaPlayer();
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             try {
 
-                mediaPlayer.setDataSource(url+madarinsAudios[i]);
+                mediaPlayer.setDataSource(ocean);
 
                 mediaPlayer.prepareAsync(); // might take long! (for buffering, etc)
             } catch (IOException e) {
@@ -151,14 +181,13 @@ public class Session extends AppCompatActivity {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     mediaPlayer.start();
-                  //  mediaPlayer.setLooping(true);
+                    //  mediaPlayer.setLooping(true);
                 }
             });
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    if(i<2)
-                    {
+                    if (i < 2) {
                         i++;
                         try {
                             mediaPlayer.stop();
@@ -166,20 +195,18 @@ public class Session extends AppCompatActivity {
                             if (mediaPlayer == null)
                                 mediaPlayer = new MediaPlayer();
 
-                            mediaPlayer.setDataSource(url+madarinsAudios[i]);
+                            mediaPlayer.setDataSource(url + madarinsAudios[i]);
                             mediaPlayer.prepareAsync();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                    }
-                    else if(i==2)
-                    {
+                    } else if (i == 2) {
                         stopmusic();
                         playmusic();
                     }
                 }
             });
-
+        }
         }
 
     public void stopmusic ()
