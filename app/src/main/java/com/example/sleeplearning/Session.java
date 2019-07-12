@@ -1,8 +1,11 @@
 package com.example.sleeplearning;
 
+import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.wifi.WifiManager;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,24 +28,77 @@ public class Session extends AppCompatActivity {
     public boolean running;
     public long pauseOffset;
     private String timerLimit;
+    private MediaPlayer silen;
     private int i = 0;
     private int counter = 0;
     private int x = 0;
+    PowerManager.WakeLock pwakelock;
     private boolean paused = false;
     HashMap<String, Object> responses = new HashMap<>();
     String url = "https://storage.googleapis.com/sleep-learning-app/audio-files/"; // your URL here
     MediaPlayer mediaPlayer = new MediaPlayer();
-    String ocean = "https://storage.googleapis.com/sleep-learning-app/audio-files/ocean.mp3";
 
+    String ocean = "https://storage.googleapis.com/sleep-learning-app/audio-files/ocean.mp3";
+    String silence = "https://storage.googleapis.com/sleep-learning-app/audio-files/20-minutes-of-silence.m4a";
+    String fullsilence = "https://storage.googleapis.com/sleep-learning-app/audio-files/40-minutes-of-silence.m4a";
     String madarinsAudios []={
       "mandarin-1.m4a",
+            "mandarin-2.m4a",
+            "mandarin-3.m4a",
+
+            "mandarin-1.m4a",
+            "mandarin-2.m4a",
+            "mandarin-3.m4a",
+            "mandarin-1.m4a",
+            "mandarin-2.m4a",
+            "mandarin-3.m4a",
+            "mandarin-1.m4a",
+            "mandarin-2.m4a",
+            "mandarin-3.m4a",
+            "mandarin-1.m4a",
             "mandarin-2.m4a",
             "mandarin-3.m4a"
     };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        silen = new MediaPlayer();
+        silen.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+        silen.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        try {
+            silen.setDataSource(fullsilence);
+            silen.prepareAsync();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        silen.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                silen.start();
+            }
+        });
+        silen.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                if (silen.isPlaying())
+                    silen.stop();
+                silen.release();
+                silen= null;
+                playmusic();
+            }
+        });
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session);
+        //wakelock acquire
+        final WifiManager.WifiLock wifiLock = ((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE))
+                .createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        final PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "MyApp::MyWakelockTag");
+        wakeLock.acquire();
+        wifiLock.acquire();
+
+
+        acquireLock();
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         Date date = new Date();
@@ -67,11 +123,16 @@ public class Session extends AppCompatActivity {
         timer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
             @Override
             public void onChronometerTick(Chronometer chronometer) {
+                long time = SystemClock.elapsedRealtime() - chronometer.getBase();
+                int h   = (int)(time /3600000);
+                int m = (int)(time - h*3600000)/60000;
+                int s= (int)(time - h*3600000- m*60000)/1000 ;
+                String hh = h < 10 ? "0"+h: h+"";
+                String mm = m < 10 ? "0"+m: m+"";
+                String ss = s < 10 ? "0"+s: s+"";
+                chronometer.setText(hh+":"+mm+":"+ss);
 
-                if(timerLimit.equals(timer.getText()))
-                {
-                    playmusic();
-                }
+
                 if ("05:00:00".equals(timer.getText()))
                 {
                     stopmusic();
@@ -93,10 +154,18 @@ public class Session extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 stopTimer(v);
+                wifiLock.release();
+                wakeLock.release();
+
+                releaseLock();
                 if (mediaPlayer.isPlaying())
                     mediaPlayer.stop();
                 mediaPlayer.release();
                 mediaPlayer = null;
+                if (silen.isPlaying())
+                    silen.stop();
+                silen.release();
+                silen = null;
                 //alertD.setView(promptView);
                 //alertD.setCancelable(false);
                 //alertD.show();
@@ -125,7 +194,25 @@ public class Session extends AppCompatActivity {
                     x = mediaPlayer.getCurrentPosition();
                     mediaPlayer.pause();
                     paused = true;
-                    timerLimit = "20:00";
+                    try {
+                        if(silen.isPlaying())
+                            silen.stop();
+                        silen.reset();
+                        if (silen == null)
+                            silen = new MediaPlayer();
+                        silen.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+
+                        silen.setDataSource(silence);
+                        silen.prepareAsync();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    silen.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                        @Override
+                        public void onPrepared(MediaPlayer mp) {
+                            silen.start();
+                        }
+                    });
                     //mediaPlayer.release();
                     //mediaPlayer = null;
                 }
@@ -164,10 +251,11 @@ public class Session extends AppCompatActivity {
 
         }
         else {
-            i = -1;
+            i = 0;
 
             if (mediaPlayer == null)
                 mediaPlayer = new MediaPlayer();
+            mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             try {
 
@@ -187,22 +275,21 @@ public class Session extends AppCompatActivity {
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    if (i < 2) {
-                        i++;
+                    if (i < 15) {
+
                         try {
                             mediaPlayer.stop();
                             mediaPlayer.reset();
                             if (mediaPlayer == null)
                                 mediaPlayer = new MediaPlayer();
-
+                            mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
                             mediaPlayer.setDataSource(url + madarinsAudios[i]);
+                            i++;
                             mediaPlayer.prepareAsync();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                    } else if (i == 2) {
-                        stopmusic();
-                        playmusic();
+
                     }
                 }
             });
@@ -216,6 +303,21 @@ public class Session extends AppCompatActivity {
         mediaPlayer.stop();
         mediaPlayer.release();
         mediaPlayer = null;
+        if (silen.isPlaying())
+            silen.stop();
+        silen.stop();
+        silen.release();
+        silen = null;
+    }
+    public void acquireLock()
+    {
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        pwakelock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"myapp:mywakelocktag");
+        pwakelock.acquire();
+    }
+    public  void releaseLock()
+    {
+        pwakelock.release();
     }
 
 }
