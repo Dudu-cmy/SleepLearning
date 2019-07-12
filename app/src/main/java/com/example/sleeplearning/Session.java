@@ -219,6 +219,12 @@ public class Session extends AppCompatActivity {
                             silen.start();
                         }
                     });
+                    silen.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mp) {
+                            playmusic();
+                        }
+                    });
                     //mediaPlayer.release();
                     //mediaPlayer = null;
                 }
