@@ -158,14 +158,18 @@ public class Session extends AppCompatActivity {
                 wakeLock.release();
 
                 releaseLock();
-                if (mediaPlayer.isPlaying())
-                    mediaPlayer.stop();
-                mediaPlayer.release();
-                mediaPlayer = null;
-                if (silen.isPlaying())
-                    silen.stop();
-                silen.release();
-                silen = null;
+                if (mediaPlayer!=null) {
+                    if (mediaPlayer.isPlaying())
+                        mediaPlayer.stop();
+                    mediaPlayer.release();
+                    mediaPlayer = null;
+                }
+                if (silen!=null) {
+                    if (silen.isPlaying())
+                        silen.stop();
+                    silen.release();
+                    silen = null;
+                }
                 //alertD.setView(promptView);
                 //alertD.setCancelable(false);
                 //alertD.show();
@@ -188,6 +192,7 @@ public class Session extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+
                 if (mediaPlayer.isPlaying()) {
                     counter++;
                     startTimer(v);
@@ -195,9 +200,10 @@ public class Session extends AppCompatActivity {
                     mediaPlayer.pause();
                     paused = true;
                     try {
+                        if (silen!=null){
                         if(silen.isPlaying())
                             silen.stop();
-                        silen.reset();
+                        silen.reset();}
                         if (silen == null)
                             silen = new MediaPlayer();
                         silen.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
@@ -319,6 +325,41 @@ public class Session extends AppCompatActivity {
     {
         pwakelock.release();
     }
+    /*int silencePosition=0,soundPosition=0;
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (silen!=null) {
+            if (silen.isPlaying()) {
+                silencePosition = silen.getCurrentPosition();
+                silen.pause();
+            }
+        }
+        if (mediaPlayer!=null) {
+            if (mediaPlayer.isPlaying()) {
+                soundPosition = mediaPlayer.getCurrentPosition();
+                mediaPlayer.pause();
+            }
+        }
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (silen!=null)
+        {
+        if (!silen.isPlaying() && silen.getCurrentPosition() > 1)
+        {
+            silen.seekTo(silen.getCurrentPosition());
+            silen.start();
+        }
+        }
+        if (mediaPlayer!=null) {
+            if (!mediaPlayer.isPlaying() && mediaPlayer.getCurrentPosition() > 1) {
+                mediaPlayer.seekTo(mediaPlayer.getCurrentPosition());
+                mediaPlayer.start();
+            }
+        }
+    }*/
 }
 
