@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,6 +19,7 @@ Button submit;
 EditText message;
 TextView txt;
 HashMap<String, Object> responses = new HashMap<>();
+ImageView backButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,6 +27,13 @@ HashMap<String, Object> responses = new HashMap<>();
         submit = findViewById(R.id.submit);
         txt = findViewById(R.id.messageuserInput);
         message = findViewById(R.id.userResponse);
+        backButton = findViewById(R.id.backButton);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
         responses = (HashMap<String, Object>)getIntent().getSerializableExtra("response data");
         submit.setOnClickListener(new View.OnClickListener() {
             @Override

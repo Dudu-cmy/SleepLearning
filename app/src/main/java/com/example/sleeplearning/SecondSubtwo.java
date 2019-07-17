@@ -4,6 +4,7 @@ import android.content.Intent;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 public class SecondSubtwo extends AppCompatActivity {
     TextView yesBtn,noBtn,message;
     HashMap<String, Object> responses = new HashMap<>();
+    ImageView backButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -18,6 +20,13 @@ public class SecondSubtwo extends AppCompatActivity {
         yesBtn = findViewById(R.id.yesButton);
         noBtn = findViewById(R.id.noButton);
         message = findViewById(R.id.message);
+        backButton = findViewById(R.id.backButton);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
         responses = (HashMap<String, Object>)getIntent().getSerializableExtra("response data");
         yesBtn.setOnClickListener(new View.OnClickListener() {
             @Override
