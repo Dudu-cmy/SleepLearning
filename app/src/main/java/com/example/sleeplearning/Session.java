@@ -1,6 +1,7 @@
 package com.example.sleeplearning;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -40,7 +41,7 @@ public class Session extends AppCompatActivity {
 
     String ocean = "https://storage.googleapis.com/sleep-learning-app/audio-files/ocean.mp3";
     String silence = "https://storage.googleapis.com/sleep-learning-app/audio-files/20-minutes-of-silence.m4a";
-    String fullsilence = "https://storage.googleapis.com/sleep-learning-app/audio-files/40-minutes-of-silence.m4a";
+    String fullsilence = "https://storage.googleapis.com/sleep-learning-app/audio-files/mandarin-1.m4a";
     String madarinsAudios []={
       "mandarin-1.m4a",
             "mandarin-2.m4a",
@@ -367,5 +368,33 @@ public class Session extends AppCompatActivity {
             }
         }
     }*/
+
+    @Override
+    protected void onUserLeaveHint() {
+
+        super.onUserLeaveHint();
+
+    }
+
+    @Override
+    protected void onPause() {
+        final WifiManager.WifiLock wifiLock = ((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE))
+                .createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        final PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "MyApp::MyWakelockTag");
+        wakeLock.acquire();
+        wifiLock.acquire();
+        silen.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+        mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+        onResume();
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
 }
 

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000"
+    tools:context=".Login_Page">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="47dp"
+        android:gravity="center"
+        android:text="Please enter your assigned ID number"
+        android:textColor="#C9C8C8"
+        android:textSize="40dp" />
+
+    <EditText
+        android:id="@+id/email"
+        android:layout_width="match_parent"
+
+        android:layout_height="40dp"
+        android:hint="Email"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="211dp"
+        android:background="@drawable/roundededitext"
+        android:ems="10"
+                android:inputType="textPersonName"
+         />
+
+    <EditText
+        android:id="@+id/idnumber"
+        android:layout_width="match_parent"
+
+        android:layout_height="40dp"
+        android:hint="ID Number"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="276dp"
+        android:background="@drawable/roundededitext"
+
+        android:inputType="number"
+        android:ems="10"
+
+         />
+
+    <Button
+        android:id="@+id/login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+
+        android:layout_centerHorizontal="true"
+
+
+        android:layout_marginTop="330dp"
+        android:background="#000"
+        android:text="Continue"
+        android:textColor="#C9C8C8"
+        android:textSize="20dp" />
+
+</RelativeLayout>
