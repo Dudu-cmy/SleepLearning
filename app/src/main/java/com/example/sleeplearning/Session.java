@@ -41,7 +41,7 @@ public class Session extends AppCompatActivity {
 
     String ocean = "https://storage.googleapis.com/sleep-learning-app/audio-files/ocean.mp3";
     String silence = "https://storage.googleapis.com/sleep-learning-app/audio-files/20-minutes-of-silence.m4a";
-    String fullsilence = "https://storage.googleapis.com/sleep-learning-app/audio-files/mandarin-1.m4a";
+    String fullsilence = "https://storage.googleapis.com/sleep-learning-app/audio-files/40-minutes-of-silence.m4a";
     String madarinsAudios []={
       "mandarin-1.m4a",
             "mandarin-2.m4a",
@@ -387,7 +387,7 @@ public class Session extends AppCompatActivity {
         wifiLock.acquire();
         silen.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-        onResume();
+       // onResume();
         super.onPause();
     }
 
