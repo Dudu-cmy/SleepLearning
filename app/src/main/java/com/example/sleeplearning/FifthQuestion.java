@@ -94,15 +94,11 @@ public class FifthQuestion extends AppCompatActivity {
                             @Override
                             public void onSuccess(DocumentSnapshot documentSnapshot) {
                                 UserData data = documentSnapshot.toObject(UserData.class);
-                                Log.v("datassss",data.toString());
-                                Log.v("userid",userId);
                                 subjectId =data.getID();
                                 Date date = new Date();
                                 SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
                                 formatter = new SimpleDateFormat("MMM dd, yyyy");
                                 String strDate = formatter.format(date);
-                                Log.v("date",strDate);
-
                                 String userResponse = "null";
                                 userResponse = message.getText().toString();
 
@@ -114,12 +110,12 @@ public class FifthQuestion extends AppCompatActivity {
                                         responses_to_save.put(key,responses.get(key));
                                     }
                                 }
-                                Log.v("sucess 1",subjectId);
+
                                 db.collection(subjectId).document(strDate).set(responses_to_save).addOnSuccessListener(new OnSuccessListener<Void>() {
 
                                     @Override
                                     public void onSuccess(Void aVoid) {
-                                        Log.v("sucess 1","sssss");
+
                                         pd.dismiss();
                                         Intent intent = new Intent(FifthQuestion.this, MainActivity.class);
                                         startActivity(intent);
@@ -131,7 +127,7 @@ public class FifthQuestion extends AppCompatActivity {
                                 }).addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
-                                        Log.v("sucess 1","sssss");
+
                                         pd.dismiss();
                                         Toast.makeText(getApplicationContext(),"Check your internet connection",Toast.LENGTH_LONG).show();
                                     }
