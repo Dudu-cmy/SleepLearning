@@ -378,7 +378,7 @@ public class Session extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        final WifiManager.WifiLock wifiLock = ((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE))
+       /* final WifiManager.WifiLock wifiLock = ((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE))
                 .createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         final PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -387,7 +387,7 @@ public class Session extends AppCompatActivity {
         wifiLock.acquire();
         silen.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-       // onResume();
+       // onResume();*/
         super.onPause();
     }
 
