@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Chronometer;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -30,6 +31,7 @@ public class Session extends AppCompatActivity {
     public long pauseOffset;
     private String timerLimit;
     private MediaPlayer silen;
+    private  MediaPlayer oceanMediaPlayer = new MediaPlayer();
     private int i = 0;
     private int counter = 0;
     private int x = 0;
@@ -62,6 +64,9 @@ public class Session extends AppCompatActivity {
     };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        oceanMediaPlayer = new MediaPlayer();
+        oceanMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+        oceanMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         silen = new MediaPlayer();
         silen.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         silen.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -84,7 +89,7 @@ public class Session extends AppCompatActivity {
                     silen.stop();
                 silen.release();
                 silen= null;
-                playmusic();
+                playOceanAudio();
             }
         });
         super.onCreate(savedInstanceState);
@@ -194,38 +199,48 @@ public class Session extends AppCompatActivity {
             public void onClick(View v) {
 
 
-                if (mediaPlayer.isPlaying()) {
+                if (mediaPlayer.isPlaying() || oceanMediaPlayer.isPlaying()) {
                     counter++;
                     startTimer(v);
-                    x = mediaPlayer.getCurrentPosition();
-                    mediaPlayer.pause();
-                    paused = true;
-                    try {
-                        if (silen!=null){
-                        if(silen.isPlaying())
-                            silen.stop();
-                        silen.reset();}
-                        if (silen == null)
-                            silen = new MediaPlayer();
-                        silen.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+                    if (mediaPlayer.isPlaying()) {
+                        x = mediaPlayer.getCurrentPosition();
+                        mediaPlayer.pause();
+                        paused = true;
+                        try {
+                            if (silen != null) {
+                                if (silen.isPlaying())
+                                    silen.stop();
+                                silen.reset();
+                            }
+                            if (silen == null)
+                                silen = new MediaPlayer();
+                            silen.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
 
-                        silen.setDataSource(silence);
-                        silen.prepareAsync();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                            silen.setDataSource(silence);
+                            silen.prepareAsync();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        silen.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                            @Override
+                            public void onPrepared(MediaPlayer mp) {
+                                silen.start();
+                            }
+                        });
+                        silen.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                            @Override
+                            public void onCompletion(MediaPlayer mp) {
+                                playOceanAudio();
+                            }
+                        });
                     }
-                    silen.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                        @Override
-                        public void onPrepared(MediaPlayer mp) {
-                            silen.start();
-                        }
-                    });
-                    silen.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                        @Override
-                        public void onCompletion(MediaPlayer mp) {
-                            playmusic();
-                        }
-                    });
+                    else if (oceanMediaPlayer.isPlaying())
+                    {
+                        i = 0;
+                        x = 0;
+                        paused = false;
+                        playOceanAudio();
+                    }
                     //mediaPlayer.release();
                     //mediaPlayer = null;
                 }
@@ -258,6 +273,7 @@ public class Session extends AppCompatActivity {
     {
         if(paused)
         {
+
             paused =false;
             mediaPlayer.seekTo(x);
             mediaPlayer.start();
@@ -272,7 +288,7 @@ public class Session extends AppCompatActivity {
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             try {
 
-                mediaPlayer.setDataSource(ocean);
+                mediaPlayer.setDataSource(url + madarinsAudios[i]);
 
                 mediaPlayer.prepareAsync(); // might take long! (for buffering, etc)
             } catch (IOException e) {
@@ -288,16 +304,17 @@ public class Session extends AppCompatActivity {
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    if (i < 15) {
+                    if (i < 14) {
 
                         try {
+                            i++;
                             mediaPlayer.stop();
                             mediaPlayer.reset();
                             if (mediaPlayer == null)
                                 mediaPlayer = new MediaPlayer();
                             mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
                             mediaPlayer.setDataSource(url + madarinsAudios[i]);
-                            i++;
+
                             mediaPlayer.prepareAsync();
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -369,9 +386,44 @@ public class Session extends AppCompatActivity {
         }
     }*/
 
+    public void playOceanAudio()
+    {
+        if (oceanMediaPlayer == null)
+            oceanMediaPlayer = new MediaPlayer();
+        oceanMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+        oceanMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        try {
+            oceanMediaPlayer.setDataSource(ocean);
+            oceanMediaPlayer.prepareAsync();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+            oceanMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    oceanMediaPlayer.start();
+                }
+            });
+        oceanMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                if (oceanMediaPlayer!=null){
+                if (oceanMediaPlayer.isPlaying())
+                {
+                    oceanMediaPlayer.stop();
+                }
+                oceanMediaPlayer.reset();
+                }
+                playmusic();
+            }
+        });
+
+    }
+
     @Override
     protected void onUserLeaveHint() {
 
+        Toast.makeText(getApplicationContext(),"App going in the background, for seamless seesion it is recommended to run the application and keep it in the foreground",Toast.LENGTH_LONG).show();
         super.onUserLeaveHint();
 
     }
