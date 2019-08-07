@@ -11,11 +11,21 @@ import android.os.SystemClock;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Chronometer;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.sleeplearning.model.UserData;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Source;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -45,25 +55,61 @@ public class Session extends AppCompatActivity {
     String silence = "https://storage.googleapis.com/sleep-learning-app/audio-files/20-minutes-of-silence.m4a";
     String fullsilence = "https://storage.googleapis.com/sleep-learning-app/audio-files/40-minutes-of-silence.m4a";
     String madarinsAudios []={
-      "mandarin-1.m4a",
-            "mandarin-2.m4a",
-            "mandarin-3.m4a",
-
             "mandarin-1.m4a",
-            "mandarin-2.m4a",
-            "mandarin-3.m4a",
-            "mandarin-1.m4a",
-            "mandarin-2.m4a",
-            "mandarin-3.m4a",
-            "mandarin-1.m4a",
-            "mandarin-2.m4a",
-            "mandarin-3.m4a",
-            "mandarin-1.m4a",
-            "mandarin-2.m4a",
-            "mandarin-3.m4a"
+            "mandarin-2.m4a"
+     };
+    String arabicAudio [] ={
+            "arabic-1.m4a",
+            "arabic-2.m4a"
     };
+    String selectedAudioStream [];
+    String language;
+    private FirebaseAuth mAuth;
+    private FirebaseUser user;
+    private FirebaseFirestore database;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_session);
+        //wakelock acquire
+        final WifiManager.WifiLock wifiLock = ((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE))
+                .createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        final PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "MyApp::MyWakelockTag");
+        wakeLock.acquire();
+        wifiLock.acquire();
+
+
+        acquireLock();
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Date date = new Date();
+        Intent intent = getIntent();
+        responses = (HashMap<String, Object>)intent.getSerializableExtra("response data");
+        language = (String) intent.getSerializableExtra("user language");
+        Log.v("lan",language);
+        responses.put("timeWhenAsleep",new Date());
+        endSessionButton = findViewById(R.id.endSessionTxtView);
+        restartSessionButton = findViewById(R.id.restartSessionTxtView);
+        timer = findViewById(R.id.chronometer);
+        timerLimit = "40:00";
+        timer.setBase(SystemClock.elapsedRealtime() - pauseOffset);
+        timer.start();
+        running = true;
+
+
+        i=0;
+        selectedAudioStream = new String[2];
+        language = "";
+        if (language.equals("Arabic"))
+        {
+            selectedAudioStream = arabicAudio;
+        }
+        else if (language.equals("Mandarin"))
+        {
+            selectedAudioStream = madarinsAudios;
+        }
         oceanMediaPlayer = new MediaPlayer();
         oceanMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         oceanMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -71,7 +117,7 @@ public class Session extends AppCompatActivity {
         silen.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         silen.setAudioStreamType(AudioManager.STREAM_MUSIC);
         try {
-            silen.setDataSource(fullsilence);
+            silen.setDataSource(url+madarinsAudios[0]);
             silen.prepareAsync();
         } catch (IOException e) {
             e.printStackTrace();
@@ -92,36 +138,14 @@ public class Session extends AppCompatActivity {
                 playOceanAudio();
             }
         });
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_session);
-        //wakelock acquire
-        final WifiManager.WifiLock wifiLock = ((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE))
-                .createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        final PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                "MyApp::MyWakelockTag");
-        wakeLock.acquire();
-        wifiLock.acquire();
 
 
-        acquireLock();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Date date = new Date();
-        responses = (HashMap<String, Object>)getIntent().getSerializableExtra("response data");
-        responses.put("timeWhenAsleep",new Date());
-        endSessionButton = findViewById(R.id.endSessionTxtView);
-        restartSessionButton = findViewById(R.id.restartSessionTxtView);
-        timer = findViewById(R.id.chronometer);
-        timerLimit = "40:00";
-        timer.setBase(SystemClock.elapsedRealtime() - pauseOffset);
-        timer.start();
-        running = true;
         LayoutInflater layoutInflater = LayoutInflater.from(this);
         final View  promptView = layoutInflater.inflate(R.layout.requestfeedback_layout, null);
 
         final AlertDialog alertD = new AlertDialog.Builder(this).create();
 
+        // Check the language of the user and assign corresponding audio stream
 
 
         // check if the 40 min mark was reached
@@ -288,7 +312,7 @@ public class Session extends AppCompatActivity {
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             try {
 
-                mediaPlayer.setDataSource(url + madarinsAudios[i]);
+                mediaPlayer.setDataSource(url + selectedAudioStream[0]);
 
                 mediaPlayer.prepareAsync(); // might take long! (for buffering, etc)
             } catch (IOException e) {
@@ -304,7 +328,7 @@ public class Session extends AppCompatActivity {
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    if (i < 14) {
+                    if (i < 1) {
 
                         try {
                             i++;
@@ -313,7 +337,7 @@ public class Session extends AppCompatActivity {
                             if (mediaPlayer == null)
                                 mediaPlayer = new MediaPlayer();
                             mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-                            mediaPlayer.setDataSource(url + madarinsAudios[i]);
+                            mediaPlayer.setDataSource(url + selectedAudioStream[i]);
 
                             mediaPlayer.prepareAsync();
                         } catch (IOException e) {
