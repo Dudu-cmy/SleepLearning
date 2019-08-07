@@ -127,7 +127,7 @@ public class InstructionsViewController extends AppCompatActivity {
     {
         if (mediaPlayer.isPlaying())
             mediaPlayer.stop();
-        mediaPlayer.stop();
+        //mediaPlayer.stop();
         mediaPlayer.release();
         mediaPlayer = null;
 
@@ -135,6 +135,13 @@ public class InstructionsViewController extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        if (mediaPlayer!=null) {
+            if (!mediaPlayer.isPlaying())
+                stopmusic();
+            mediaPlayer.release();
+            mediaPlayer = null;
+
+        }
         Toast.makeText(getApplicationContext(),"Application Closed",Toast.LENGTH_LONG).show();
         finish();
     }
