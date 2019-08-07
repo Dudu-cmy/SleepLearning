@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.sleeplearning.adapter.ViewPagerAdapter;
 
@@ -130,5 +131,11 @@ public class InstructionsViewController extends AppCompatActivity {
         mediaPlayer.release();
         mediaPlayer = null;
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        Toast.makeText(getApplicationContext(),"Application Closed",Toast.LENGTH_LONG).show();
+        finish();
     }
 }

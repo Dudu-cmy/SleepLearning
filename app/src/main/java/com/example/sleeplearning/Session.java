@@ -71,6 +71,7 @@ public class Session extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session);
+        language = "";
         //wakelock acquire
         final WifiManager.WifiLock wifiLock = ((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE))
                 .createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
@@ -101,7 +102,7 @@ public class Session extends AppCompatActivity {
 
         i=0;
         selectedAudioStream = new String[2];
-        language = "";
+
         if (language.equals("Arabic"))
         {
             selectedAudioStream = arabicAudio;
@@ -110,6 +111,8 @@ public class Session extends AppCompatActivity {
         {
             selectedAudioStream = madarinsAudios;
         }
+        Log.v("songs",selectedAudioStream[0]);
+        Log.v("songs",selectedAudioStream[1]);
         oceanMediaPlayer = new MediaPlayer();
         oceanMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         oceanMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -117,7 +120,7 @@ public class Session extends AppCompatActivity {
         silen.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         silen.setAudioStreamType(AudioManager.STREAM_MUSIC);
         try {
-            silen.setDataSource(url+madarinsAudios[0]);
+            silen.setDataSource(fullsilence);
             silen.prepareAsync();
         } catch (IOException e) {
             e.printStackTrace();
@@ -431,7 +434,8 @@ public class Session extends AppCompatActivity {
         oceanMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                if (oceanMediaPlayer!=null){
+                if (oceanMediaPlayer!=null)
+                {
                 if (oceanMediaPlayer.isPlaying())
                 {
                     oceanMediaPlayer.stop();
@@ -447,7 +451,7 @@ public class Session extends AppCompatActivity {
     @Override
     protected void onUserLeaveHint() {
 
-        Toast.makeText(getApplicationContext(),"App going in the background, for seamless seesion it is recommended to run the application and keep it in the foreground",Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(),"App going in the background, for an uninterrupted session it is recommended to run the application and keep it in the foreground",Toast.LENGTH_LONG).show();
         super.onUserLeaveHint();
 
     }

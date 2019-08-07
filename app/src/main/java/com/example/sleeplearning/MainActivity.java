@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
         //progress dialog
         pd = new ProgressDialog(this);
-        pd.setTitle("Loading.....");
+        pd.setMessage("Loading.....");
         pd.setCanceledOnTouchOutside(false);
         pd.setCancelable(true);
 
@@ -81,9 +81,10 @@ public class MainActivity extends AppCompatActivity {
                             Intent intent = new Intent(MainActivity.this, Session.class);
                             intent.putExtra("response data", responses);
                             intent.putExtra("user language", language);
+                            pd.dismiss();
                             startActivity(intent);
                             finish();
-                            pd.dismiss();
+
 
                         }
                     }).addOnFailureListener(new OnFailureListener() {
