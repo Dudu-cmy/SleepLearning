@@ -266,6 +266,9 @@ public class Session extends AppCompatActivity {
                         i = 0;
                         x = 0;
                         paused = false;
+                        oceanMediaPlayer.stop();
+                        oceanMediaPlayer.release();
+                        oceanMediaPlayer = null;
                         //playOceanAudio();
                         try {
                             if (silen != null) {
@@ -392,6 +395,11 @@ public class Session extends AppCompatActivity {
         silen.stop();
         silen.release();
         silen = null;
+        if (oceanMediaPlayer.isPlaying())
+            oceanMediaPlayer.stop();
+        oceanMediaPlayer.stop();
+        oceanMediaPlayer.release();
+        oceanMediaPlayer = null;
     }
     public void acquireLock()
     {
