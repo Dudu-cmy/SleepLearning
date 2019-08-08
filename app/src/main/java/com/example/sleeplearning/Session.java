@@ -45,6 +45,7 @@ public class Session extends AppCompatActivity {
     private int i = 0;
     private int counter = 0;
     private int x = 0;
+    private boolean minimize = true;
     PowerManager.WakeLock pwakelock;
     private boolean paused = false;
     HashMap<String, Object> responses = new HashMap<>();
@@ -189,7 +190,7 @@ public class Session extends AppCompatActivity {
                 stopTimer(v);
                 wifiLock.release();
                 wakeLock.release();
-
+                minimize = false;
                 releaseLock();
                 if (mediaPlayer!=null) {
                     if (mediaPlayer.isPlaying())
@@ -491,8 +492,8 @@ public class Session extends AppCompatActivity {
 
     @Override
     protected void onUserLeaveHint() {
-
-        Toast.makeText(getApplicationContext(),"App going in the background, for an uninterrupted session it is recommended to run the application and keep it in the foreground",Toast.LENGTH_LONG).show();
+        if (minimize)
+            Toast.makeText(getApplicationContext(),"App going in the background, for an uninterrupted session it is recommended to run the application and keep it in the foreground",Toast.LENGTH_LONG).show();
         super.onUserLeaveHint();
 
     }
