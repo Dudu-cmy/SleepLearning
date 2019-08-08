@@ -266,7 +266,34 @@ public class Session extends AppCompatActivity {
                         i = 0;
                         x = 0;
                         paused = false;
-                        playOceanAudio();
+                        //playOceanAudio();
+                        try {
+                            if (silen != null) {
+                                if (silen.isPlaying())
+                                    silen.stop();
+                                silen.reset();
+                            }
+                            if (silen == null)
+                                silen = new MediaPlayer();
+                            silen.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+
+                            silen.setDataSource(silence);
+                            silen.prepareAsync();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        silen.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                            @Override
+                            public void onPrepared(MediaPlayer mp) {
+                                silen.start();
+                            }
+                        });
+                        silen.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                            @Override
+                            public void onCompletion(MediaPlayer mp) {
+                                playOceanAudio();
+                            }
+                        });
                     }
                     //mediaPlayer.release();
                     //mediaPlayer = null;
@@ -294,7 +321,7 @@ public class Session extends AppCompatActivity {
     // make the app run in the background so that the timer can continue to run and
     @Override
     public void onBackPressed() {
-        this.moveTaskToBack(true);
+        //this.moveTaskToBack(true);
     }
     public void playmusic ()
     {

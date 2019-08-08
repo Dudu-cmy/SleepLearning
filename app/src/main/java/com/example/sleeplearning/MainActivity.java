@@ -78,10 +78,11 @@ public class MainActivity extends AppCompatActivity {
                             UserData userData = documentSnapshot.toObject(UserData.class);
                             Log.v("language",userData.getLanguage());
                             language = userData.getLanguage();
+                            pd.dismiss();
                             Intent intent = new Intent(MainActivity.this, Session.class);
                             intent.putExtra("response data", responses);
                             intent.putExtra("user language", language);
-                            pd.dismiss();
+
                             startActivity(intent);
                             finish();
 
