@@ -197,6 +197,12 @@ public class Session extends AppCompatActivity {
                     mediaPlayer.release();
                     mediaPlayer = null;
                 }
+                if (oceanMediaPlayer!=null) {
+                    if (oceanMediaPlayer.isPlaying())
+                        oceanMediaPlayer.stop();
+                    oceanMediaPlayer.release();
+                    oceanMediaPlayer = null;
+                }
                 if (silen!=null) {
                     if (silen.isPlaying())
                         silen.stop();
