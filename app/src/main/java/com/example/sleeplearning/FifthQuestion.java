@@ -6,10 +6,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -39,7 +41,7 @@ public class FifthQuestion extends AppCompatActivity {
     String subjectId;
     HashMap<String, Object> responses = new HashMap<>();
     ProgressDialog pd;
-    ImageView backButton;
+    ImageView backButton,done;
     String userId;
     FirebaseFirestore db ;
     private FirebaseAuth mAuth;
@@ -54,7 +56,7 @@ public class FifthQuestion extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
 
-
+        done = findViewById(R.id.done);
         submit = findViewById(R.id.submit);
         txt = findViewById(R.id.messageuserInput);
         backButton = findViewById(R.id.backButton);
@@ -64,13 +66,16 @@ public class FifthQuestion extends AppCompatActivity {
                 finish();
             }
         });
+
         pd = new ProgressDialog(this);
         pd.setTitle("Thank you for your feedback ");
         pd.setMessage("\n Please wait while we are uploading your response to the server ;)");
-        pd.setCancelable(true);
+        pd.setCancelable(false);
         pd.setCanceledOnTouchOutside(false);
         message = findViewById(R.id.userResponse);
+
         responses = (HashMap<String, Object>)getIntent().getSerializableExtra("response data");
+
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -146,6 +151,13 @@ public class FifthQuestion extends AppCompatActivity {
                     //intent.putExtra("response data", responses);
                     //startActivity(intent);
                 }
+            }
+        });
+        done.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(message.getWindowToken(), 0);
             }
         });
     }

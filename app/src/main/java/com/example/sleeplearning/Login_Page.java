@@ -81,10 +81,15 @@ public class Login_Page extends AppCompatActivity {
                             }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-
+                           // notifyUser("Check, your connection or if you entered your correct credentials");
                         }
                     });
 
+                }
+                else
+                {
+                    pd.dismiss();
+                    notifyUser("Please Enter correct credentials");
                 }
             }
         });

@@ -3,9 +3,11 @@ package com.example.sleeplearning;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -18,12 +20,12 @@ public class FourthQuestion extends AppCompatActivity {
     EditText message;
     TextView txt;
     HashMap<String, Object> responses = new HashMap<>();
-    ImageView backButton;
+    ImageView backButton,done;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fourth_question);
-
+        done = findViewById(R.id.done);
         submit = findViewById(R.id.submit);
         txt = findViewById(R.id.messageuserInput);
         message = findViewById(R.id.userResponse);
@@ -55,6 +57,13 @@ public class FourthQuestion extends AppCompatActivity {
                     intent.putExtra("response data", responses);
                     startActivity(intent);
                 }
+            }
+        });
+        done.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(message.getWindowToken(), 0);
             }
         });
     }

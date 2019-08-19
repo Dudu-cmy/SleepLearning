@@ -32,19 +32,31 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-
-            <EditText
-                android:id="@+id/userResponse"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginBottom="10dp"
-                android:layout_weight="1"
-                android:background="#ffff"
-                android:gravity="center"
-                android:inputType="text"
-                android:text=""
-                android:textColor="#000"
-                android:textSize="20dp" />
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <EditText
+                    android:id="@+id/userResponse"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_weight="1"
+                    android:background="#ffff"
+                    android:gravity="center"
+                    android:inputType="text"
+                    android:text=""
+
+                    android:textColor="#000"
+                    android:textSize="20dp" />
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:id="@+id/done"
+                    android:src="@drawable/ic_done_black_24dp"
+                    android:background="#fff"/>
+            </LinearLayout>
+
             <Button
 
                 android:id="@+id/submit"
