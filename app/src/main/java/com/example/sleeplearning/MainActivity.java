@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         responses.put("headphonesStayedIn","NaN");
         responses.put("issuesWithVolume","NaN");
         responses.put("issuesWithApp","NaN");
+        responses.put("timesPressedRestart","NaN");
 
         //Get User language
         mAuth = FirebaseAuth.getInstance();

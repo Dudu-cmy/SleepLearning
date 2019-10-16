@@ -12,7 +12,7 @@ import java.util.HashMap;
 public class SecondQuestion extends AppCompatActivity {
 TextView yesBtn,noBtn,message;
 HashMap<String, Object> responses = new HashMap<>();
-ImageView backButton;
+TextView backButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

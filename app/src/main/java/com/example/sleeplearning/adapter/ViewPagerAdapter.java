@@ -29,13 +29,15 @@ public class ViewPagerAdapter extends PagerAdapter {
                     R.drawable.power,
                     R.drawable.wifi,
                     R.drawable.speaker,
+                    R.drawable.donotdisturb
 
             };
     public String messages[] =
             {
               "Please make sure your phone is plugged in and charging",
                     "Check to see that you're connected to WiFi",
-                    "Make sure your earbuds are plugged in and the volume is at a comfortable level"
+                    "Make sure your earbuds are plugged in and the volume is at a comfortable level",
+                    "Put your phone on do not disturb"
             };
     @Override
     public int getCount() {

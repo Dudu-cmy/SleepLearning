@@ -8,11 +8,12 @@
     android:background="#050505">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
+        android:gravity="center"
         android:layout_height="wrap_content"
-        android:text="Start Session"
+        android:text="Press Here to Begin Session"
         android:textColor="#ffff"
-        android:textSize="30dp"
+        android:textSize="35dp"
         android:id="@+id/startTxt"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"

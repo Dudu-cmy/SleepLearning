@@ -23,6 +23,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.*;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -41,7 +42,8 @@ public class FifthQuestion extends AppCompatActivity {
     String subjectId;
     HashMap<String, Object> responses = new HashMap<>();
     ProgressDialog pd;
-    ImageView backButton,done;
+    ImageView done;
+    TextView backButton;
     String userId;
     FirebaseFirestore db ;
     private FirebaseAuth mAuth;
@@ -122,7 +124,7 @@ public class FifthQuestion extends AppCompatActivity {
                                     public void onSuccess(Void aVoid) {
 
                                         pd.dismiss();
-                                        Intent intent = new Intent(FifthQuestion.this, MainActivity.class);
+                                        Intent intent = new Intent(FifthQuestion.this, Session_end.class);
                                         startActivity(intent);
                                         finishAffinity();
 

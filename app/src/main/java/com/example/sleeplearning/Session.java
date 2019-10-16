@@ -1,5 +1,6 @@
 package com.example.sleeplearning;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -30,6 +31,7 @@ import com.google.firebase.firestore.Source;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.TimeZone;
@@ -46,6 +48,7 @@ public class Session extends AppCompatActivity {
     private int counter = 0;
     private int x = 0;
     private boolean minimize = true;
+    private ArrayList<Date> timestamps;
     PowerManager.WakeLock pwakelock;
     private boolean paused = false;
     HashMap<String, Object> responses = new HashMap<>();
@@ -57,11 +60,11 @@ public class Session extends AppCompatActivity {
     String fullsilence = "https://storage.googleapis.com/sleep-learning-app/audio-files/40-minutes-of-silence.m4a";
     String madarinsAudios []={
             "mandarin-1.m4a",
-            "mandarin-2.m4a"
+           // "mandarin-2.m4a"
      };
     String arabicAudio [] ={
             "arabic-1.m4a",
-            "arabic-2.m4a"
+            //"arabic-2.m4a"
     };
     String selectedAudioStream [];
     String language;
@@ -73,6 +76,7 @@ public class Session extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session);
         language = "";
+        timestamps =  new ArrayList<>();
         //wakelock acquire
         final WifiManager.WifiLock wifiLock = ((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE))
                 .createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
@@ -94,11 +98,11 @@ public class Session extends AppCompatActivity {
         responses.put("timeWhenAsleep",new Date());
         endSessionButton = findViewById(R.id.endSessionTxtView);
         restartSessionButton = findViewById(R.id.restartSessionTxtView);
-        timer = findViewById(R.id.chronometer);
+        /*timer = findViewById(R.id.chronometer);
         timerLimit = "40:00";
         timer.setBase(SystemClock.elapsedRealtime() - pauseOffset);
         timer.start();
-        running = true;
+        running = true;*/
 
 
         i=0;
@@ -113,7 +117,7 @@ public class Session extends AppCompatActivity {
             selectedAudioStream = madarinsAudios;
         }
         Log.v("songs",selectedAudioStream[0]);
-        Log.v("songs",selectedAudioStream[1]);
+      //  Log.v("songs",selectedAudioStream[1]);
         oceanMediaPlayer = new MediaPlayer();
         oceanMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         oceanMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -154,7 +158,7 @@ public class Session extends AppCompatActivity {
 
         // check if the 40 min mark was reached
 
-        timer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
+       /* timer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
             @Override
             public void onChronometerTick(Chronometer chronometer) {
                 long time = SystemClock.elapsedRealtime() - chronometer.getBase();
@@ -172,7 +176,7 @@ public class Session extends AppCompatActivity {
                     stopmusic();
                 }
             }
-        });
+        });*/
        /* timer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
             @Override
             public void onChronometerTick(Chronometer chronometer) {
@@ -182,49 +186,68 @@ public class Session extends AppCompatActivity {
                 }
             }
         });*/
-        timer.setBase(SystemClock.elapsedRealtime());
+       // timer.setBase(SystemClock.elapsedRealtime());
         //when the user clicks the end session button
         endSessionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                stopTimer(v);
-                wifiLock.release();
-                wakeLock.release();
-                minimize = false;
-                releaseLock();
-                if (mediaPlayer!=null) {
-                    if (mediaPlayer.isPlaying())
-                        mediaPlayer.stop();
-                    mediaPlayer.release();
-                    mediaPlayer = null;
-                }
-                if (oceanMediaPlayer!=null) {
-                    if (oceanMediaPlayer.isPlaying())
-                        oceanMediaPlayer.stop();
-                    oceanMediaPlayer.release();
-                    oceanMediaPlayer = null;
-                }
-                if (silen!=null) {
-                    if (silen.isPlaying())
-                        silen.stop();
-                    silen.release();
-                    silen = null;
-                }
-                //alertD.setView(promptView);
-                //alertD.setCancelable(false);
-                //alertD.show();
-                DateFormat dateFormats = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                dateFormats.setTimeZone(TimeZone.getTimeZone("UTC"));
-                responses.put("timeWhenAwake",new Date());
-                responses.put("numberOfRestarts",counter);
-                Intent intent = new Intent(Session.this, FirstQuestion.class);
-                intent.putExtra("response data", responses);
-                startActivity(intent);
-                finish();
+                final AlertDialog.Builder builder =  new AlertDialog.Builder(Session.this);
+                builder.setMessage("Are you sure you want to end the session?");
+                builder.setTitle("Confirm");
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        wifiLock.release();
+                        wakeLock.release();
+                        minimize = false;
+                        releaseLock();
+                        if (mediaPlayer!=null) {
+                            if (mediaPlayer.isPlaying())
+                                mediaPlayer.stop();
+                            mediaPlayer.release();
+                            mediaPlayer = null;
+                        }
+                        if (oceanMediaPlayer!=null) {
+                            if (oceanMediaPlayer.isPlaying())
+                                oceanMediaPlayer.stop();
+                            oceanMediaPlayer.release();
+                            oceanMediaPlayer = null;
+                        }
+                        if (silen!=null) {
+                            if (silen.isPlaying())
+                                silen.stop();
+                            silen.release();
+                            silen = null;
+                        }
+                        //alertD.setView(promptView);
+                        //alertD.setCancelable(false);
+                        //alertD.show();
+                        DateFormat dateFormats = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                        dateFormats.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        responses.put("timeWhenAwake",new Date());
+                        responses.put("numberOfRestarts",counter);
+                        if(timestamps.size()!=0) {
+                            responses.put("timesPressedRestart", timestamps);
+                        }
+                        Intent intent = new Intent(Session.this, FirstQuestion.class);
+                        intent.putExtra("response data", responses);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
+                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+
                 //Intent intent = new Intent(Session.this, MainActivity.class);
                 //startActivity(intent);
                 //finish();
-
+                AlertDialog dialog = builder.create();
+                dialog.show();
             }
         });
 
@@ -235,7 +258,8 @@ public class Session extends AppCompatActivity {
 
                 if (mediaPlayer.isPlaying() || oceanMediaPlayer.isPlaying()) {
                     counter++;
-                    startTimer(v);
+                    timestamps.add(new Date());
+                    //startTimer(v);
                     if (mediaPlayer.isPlaying()) {
                         x = mediaPlayer.getCurrentPosition();
                         mediaPlayer.pause();
@@ -311,7 +335,7 @@ public class Session extends AppCompatActivity {
             }
         });
     }
-    public void startTimer(View v)
+  /*  public void startTimer(View v)
     {
 
             timer.setBase(SystemClock.elapsedRealtime() - pauseOffset);
@@ -327,7 +351,7 @@ public class Session extends AppCompatActivity {
         running= false;
 
     }
-
+*/
     // make the app run in the background so that the timer can continue to run and
     @Override
     public void onBackPressed() {
@@ -368,7 +392,7 @@ public class Session extends AppCompatActivity {
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    if (i < 1) {
+                    if (i < 0) {
 
                         try {
                             i++;

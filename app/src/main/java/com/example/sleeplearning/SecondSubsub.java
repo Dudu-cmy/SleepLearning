@@ -20,7 +20,8 @@ public class SecondSubsub extends AppCompatActivity {
     EditText message;
     TextView txt;
     HashMap<String, Object> responses = new HashMap<>();
-    ImageView backButton,done;
+    ImageView done;
+    TextView backButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

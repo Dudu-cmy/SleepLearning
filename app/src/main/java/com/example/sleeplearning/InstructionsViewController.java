@@ -35,7 +35,7 @@ public class InstructionsViewController extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_instructions_view_controller);
-        img = new int[]{R.drawable.power, R.drawable.wifi, R.drawable.speaker};
+        img = new int[]{R.drawable.power, R.drawable.wifi, R.drawable.speaker,R.drawable.donotdisturb};
         playmusic();
         linearLayout = findViewById(R.id.linearLayout);
         viewPager = findViewById(R.id.pager);
@@ -58,9 +58,9 @@ public class InstructionsViewController extends AppCompatActivity {
     }
     public void addDotsIndicator(int it)
     {
-        mdots = new TextView[3];
+        mdots = new TextView[4];
         linearLayout.removeAllViews();
-        for(int i = 0 ; i<3;i++)
+        for(int i = 0 ; i<4;i++)
         {
             mdots[i] = new TextView(this);
             mdots[i].setText(Html.fromHtml("&#8226;"));

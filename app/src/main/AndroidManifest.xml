@@ -12,39 +12,54 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Login_Page"
-            android:screenOrientation="portrait" ><intent-filter>
-            <action android:name="android.intent.action.MAIN" />
+        <activity android:name=".Session_end"></activity>
+        <activity
+            android:name=".Login_Page"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter></activity>
-        <activity android:name=".FifthQuestion"
-            android:screenOrientation="portrait" />
-        <activity android:name=".FourthQuestion"
-            android:screenOrientation="portrait" />
-        <activity android:name=".InstructionsViewController"
-            android:screenOrientation="portrait" >
-
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
-        <activity android:name=".ThirdQuestion"
+        <activity
+            android:name=".FifthQuestion"
             android:screenOrientation="portrait" />
-        <activity android:name=".SecondSubsub"
+        <activity
+            android:name=".FourthQuestion"
             android:screenOrientation="portrait" />
-        <activity android:name=".SecondSubtwo"
+        <activity
+            android:name=".InstructionsViewController"
+            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".ThirdQuestion"
             android:screenOrientation="portrait" />
-        <activity android:name=".SecondQuestionSub"
+        <activity
+            android:name=".SecondSubsub"
             android:screenOrientation="portrait" />
-        <activity android:name=".SecondQuestion"
+        <activity
+            android:name=".SecondSubtwo"
             android:screenOrientation="portrait" />
-        <activity android:name=".FirstSubQuestion"
+        <activity
+            android:name=".SecondQuestionSub"
             android:screenOrientation="portrait" />
-        <activity android:name=".FirstQuestion"
+        <activity
+            android:name=".SecondQuestion"
             android:screenOrientation="portrait" />
-        <activity android:name=".Feedback"
+        <activity
+            android:name=".FirstSubQuestion"
             android:screenOrientation="portrait" />
-        <activity android:name=".Session"
+        <activity
+            android:name=".FirstQuestion"
             android:screenOrientation="portrait" />
-        <activity android:name=".MainActivity"
+        <activity
+            android:name=".Feedback"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Session"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".MainActivity"
             android:screenOrientation="portrait" />
     </application>
 
