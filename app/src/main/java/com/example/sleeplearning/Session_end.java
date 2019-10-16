@@ -16,7 +16,7 @@ public class Session_end extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-        finish();
+        finishAffinity();
         Toast.makeText(getApplicationContext(),"App closed", Toast.LENGTH_SHORT).show();
         super.onBackPressed();
     }

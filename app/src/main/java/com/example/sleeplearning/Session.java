@@ -377,7 +377,7 @@ public class Session extends AppCompatActivity {
             try {
 
                 mediaPlayer.setDataSource(url + selectedAudioStream[0]);
-
+                Log.v("log","preparing");
                 mediaPlayer.prepareAsync(); // might take long! (for buffering, etc)
             } catch (IOException e) {
                 e.printStackTrace();
@@ -386,6 +386,7 @@ public class Session extends AppCompatActivity {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     mediaPlayer.start();
+                    Log.v("log","starting");
                     //  mediaPlayer.setLooping(true);
                 }
             });
@@ -494,6 +495,7 @@ public class Session extends AppCompatActivity {
             oceanMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
+                    Log.v("log","preparing ocean start");
                     oceanMediaPlayer.start();
                 }
             });
@@ -508,6 +510,7 @@ public class Session extends AppCompatActivity {
                 }
                 oceanMediaPlayer.reset();
                 }
+                Log.v("log","next music");
                 playmusic();
             }
         });
