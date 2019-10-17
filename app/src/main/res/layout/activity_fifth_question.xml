@@ -32,20 +32,20 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="120dp"
             android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginTop="50dp">
+                android:layout_marginTop="0dp">
 
                 <EditText
                     android:id="@+id/userResponse"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:layout_marginBottom="50dp"
+                    android:layout_marginBottom="25dp"
                     android:layout_weight="1"
                     android:background="#ffff"
                     android:gravity="center"
