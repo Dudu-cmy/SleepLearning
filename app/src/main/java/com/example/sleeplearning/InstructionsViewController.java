@@ -35,8 +35,8 @@ public class InstructionsViewController extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_instructions_view_controller);
-        img = new int[]{R.drawable.power, R.drawable.wifi, R.drawable.speaker,R.drawable.donotdisturb};
-        playmusic();
+        img = new int[]{R.drawable.power, R.drawable.wifi,R.drawable.donotdisturb, R.drawable.speaker};
+        //playmusic();
         linearLayout = findViewById(R.id.linearLayout);
         viewPager = findViewById(R.id.pager);
         adapter = new ViewPagerAdapter(InstructionsViewController.this,img);
@@ -86,10 +86,12 @@ public class InstructionsViewController extends AppCompatActivity {
             currentpage = i;
             if (currentpage == mdots.length - 1){
                 start.setEnabled(true);
+                playmusic();
                 start.setVisibility(View.VISIBLE);
                 start.setText("Continue");
             }
             else {
+                stopmusic();
                 start.setEnabled(false);
                 start.setVisibility(View.INVISIBLE);
                 start.setText("Continue");
@@ -125,12 +127,13 @@ public class InstructionsViewController extends AppCompatActivity {
     }
     public void stopmusic ()
     {
-        if (mediaPlayer.isPlaying())
-            mediaPlayer.stop();
-        //mediaPlayer.stop();
-        mediaPlayer.release();
-        mediaPlayer = null;
-
+        if(mediaPlayer!= null) {
+            if (mediaPlayer.isPlaying())
+                mediaPlayer.stop();
+            //mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
     }
 
     @Override

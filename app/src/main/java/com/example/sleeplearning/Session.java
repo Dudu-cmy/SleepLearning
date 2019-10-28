@@ -60,17 +60,21 @@ public class Session extends AppCompatActivity {
     String fullsilence = "https://storage.googleapis.com/sleep-learning-app/audio-files/40-minutes-of-silence.m4a";
     String madarinsAudios []={
             "mandarin-1.m4a",
-           // "mandarin-2.m4a"
+            "mandarin-2.m4a"
      };
     String arabicAudio [] ={
             "arabic-1.m4a",
-            //"arabic-2.m4a"
+            "arabic-2.m4a",
+            "arabic-3.m4a"
     };
     String selectedAudioStream [];
     String language;
     private FirebaseAuth mAuth;
     private FirebaseUser user;
     private FirebaseFirestore database;
+    WifiManager.WifiLock wifiLock;
+    PowerManager powerManager;
+     PowerManager.WakeLock wakeLock;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,10 +82,10 @@ public class Session extends AppCompatActivity {
         language = "";
         timestamps =  new ArrayList<>();
         //wakelock acquire
-        final WifiManager.WifiLock wifiLock = ((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE))
+         wifiLock = ((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE))
                 .createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        final PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+         powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "MyApp::MyWakelockTag");
         wakeLock.acquire();
         wifiLock.acquire();
@@ -255,82 +259,85 @@ public class Session extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                Log.v("songs", "restart pressed");
+                if (mediaPlayer != null) {
+                    if (mediaPlayer.isPlaying() || oceanMediaPlayer.isPlaying()) {
+                        Log.v("songs", "restart accepted");
+                        counter++;
+                        timestamps.add(new Date());
+                        //startTimer(v);
+                        if (mediaPlayer.isPlaying()) {
+                            x = mediaPlayer.getCurrentPosition();
+                            mediaPlayer.pause();
+                            paused = true;
+                            try {
+                                if (silen != null) {
+                                    if (silen.isPlaying())
+                                        silen.stop();
+                                    silen.reset();
+                                }
+                                if (silen == null)
+                                    silen = new MediaPlayer();
+                                silen.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
 
-                if (mediaPlayer.isPlaying() || oceanMediaPlayer.isPlaying()) {
-                    counter++;
-                    timestamps.add(new Date());
-                    //startTimer(v);
-                    if (mediaPlayer.isPlaying()) {
-                        x = mediaPlayer.getCurrentPosition();
-                        mediaPlayer.pause();
-                        paused = true;
-                        try {
-                            if (silen != null) {
-                                if (silen.isPlaying())
-                                    silen.stop();
-                                silen.reset();
+                                silen.setDataSource(silence);
+                                silen.prepareAsync();
+                            } catch (IOException e) {
+                                e.printStackTrace();
                             }
-                            if (silen == null)
-                                silen = new MediaPlayer();
-                            silen.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+                            silen.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                                @Override
+                                public void onPrepared(MediaPlayer mp) {
+                                    silen.start();
+                                }
+                            });
+                            silen.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                @Override
+                                public void onCompletion(MediaPlayer mp) {
+                                    playOceanAudio();
+                                }
+                            });
+                        } else if (oceanMediaPlayer.isPlaying()) {
+                            i = 0;
+                            x = 0;
+                            paused = false;
+                            oceanMediaPlayer.stop();
+                            oceanMediaPlayer.release();
+                            oceanMediaPlayer = null;
+                            //playOceanAudio();
+                            try {
+                                if (silen != null) {
+                                    if (silen.isPlaying())
+                                        silen.stop();
+                                    silen.reset();
+                                }
+                                if (silen == null)
+                                    silen = new MediaPlayer();
+                                silen.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
 
-                            silen.setDataSource(silence);
-                            silen.prepareAsync();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                                silen.setDataSource(silence);
+                                silen.prepareAsync();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            silen.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                                @Override
+                                public void onPrepared(MediaPlayer mp) {
+                                    silen.start();
+                                }
+                            });
+                            silen.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                @Override
+                                public void onCompletion(MediaPlayer mp) {
+                                    playOceanAudio();
+                                }
+                            });
                         }
-                        silen.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                            @Override
-                            public void onPrepared(MediaPlayer mp) {
-                                silen.start();
-                            }
-                        });
-                        silen.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                            @Override
-                            public void onCompletion(MediaPlayer mp) {
-                                playOceanAudio();
-                            }
-                        });
+                        //mediaPlayer.release();
+                        //mediaPlayer = null;
+                    } else {
+                        Log.v("songs", "restart refused");
                     }
-                    else if (oceanMediaPlayer.isPlaying())
-                    {
-                        i = 0;
-                        x = 0;
-                        paused = false;
-                        oceanMediaPlayer.stop();
-                        oceanMediaPlayer.release();
-                        oceanMediaPlayer = null;
-                        //playOceanAudio();
-                        try {
-                            if (silen != null) {
-                                if (silen.isPlaying())
-                                    silen.stop();
-                                silen.reset();
-                            }
-                            if (silen == null)
-                                silen = new MediaPlayer();
-                            silen.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-
-                            silen.setDataSource(silence);
-                            silen.prepareAsync();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        silen.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                            @Override
-                            public void onPrepared(MediaPlayer mp) {
-                                silen.start();
-                            }
-                        });
-                        silen.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                            @Override
-                            public void onCompletion(MediaPlayer mp) {
-                                playOceanAudio();
-                            }
-                        });
-                    }
-                    //mediaPlayer.release();
-                    //mediaPlayer = null;
                 }
             }
         });
@@ -393,7 +400,7 @@ public class Session extends AppCompatActivity {
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    if (i < 0) {
+                    if (i < (selectedAudioStream.length-1)) {
 
                         try {
                             i++;
@@ -522,11 +529,18 @@ public class Session extends AppCompatActivity {
         if (minimize)
             Toast.makeText(getApplicationContext(),"App going in the background, for an uninterrupted session it is recommended to run the application and keep it in the foreground",Toast.LENGTH_LONG).show();
         super.onUserLeaveHint();
+        wakeLock.acquire();
+        wifiLock.acquire();
+
 
     }
 
     @Override
     protected void onPause() {
+        wakeLock.acquire();
+        wifiLock.acquire();
+        oceanMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+        Log.v("pause","pausing");
        /* final WifiManager.WifiLock wifiLock = ((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE))
                 .createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
@@ -537,11 +551,16 @@ public class Session extends AppCompatActivity {
         silen.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
        // onResume();*/
-        super.onPause();
+       super.onPause();
     }
 
     @Override
     protected void onResume() {
+        //super.onResume();
+        Log.v("paused","pausingd");
+        oceanMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+        wakeLock.acquire();
+        wifiLock.acquire();
         super.onResume();
     }
 
