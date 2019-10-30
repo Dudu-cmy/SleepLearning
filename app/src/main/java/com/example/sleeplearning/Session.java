@@ -147,6 +147,7 @@ public class Session extends AppCompatActivity {
                     silen.stop();
                 silen.release();
                 silen= null;
+                Log.v("silence","silence audio finisged");
                 playOceanAudio();
             }
         });
@@ -403,6 +404,7 @@ public class Session extends AppCompatActivity {
                     if (i < (selectedAudioStream.length-1)) {
 
                         try {
+                            Log.v("audio","manadarin 2");
                             i++;
                             mediaPlayer.stop();
                             mediaPlayer.reset();
@@ -489,6 +491,7 @@ public class Session extends AppCompatActivity {
 
     public void playOceanAudio()
     {
+        Log.v("audio","ocean");
         if (oceanMediaPlayer == null)
             oceanMediaPlayer = new MediaPlayer();
         oceanMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
@@ -537,9 +540,9 @@ public class Session extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-        wakeLock.acquire();
+        /*wakeLock.acquire();
         wifiLock.acquire();
-        oceanMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+        oceanMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);*/
         Log.v("pause","pausing");
        /* final WifiManager.WifiLock wifiLock = ((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE))
                 .createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
@@ -558,9 +561,9 @@ public class Session extends AppCompatActivity {
     protected void onResume() {
         //super.onResume();
         Log.v("paused","pausingd");
-        oceanMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+        /*oceanMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         wakeLock.acquire();
-        wifiLock.acquire();
+        wifiLock.acquire();*/
         super.onResume();
     }
 
