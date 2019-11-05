@@ -384,7 +384,7 @@ public class Session extends AppCompatActivity {
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             try {
 
-                mediaPlayer.setDataSource(url + selectedAudioStream[0]);
+                mediaPlayer.setDataSource(url + selectedAudioStream[i]);
                 Log.v("log","preparing");
                 mediaPlayer.prepareAsync(); // might take long! (for buffering, etc)
             } catch (IOException e) {
@@ -414,6 +414,7 @@ public class Session extends AppCompatActivity {
                             mediaPlayer.setDataSource(url + selectedAudioStream[i]);
 
                             mediaPlayer.prepareAsync();
+
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
