@@ -77,6 +77,7 @@ public class Session extends AppCompatActivity {
      PowerManager.WakeLock wakeLock;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session);
         language = "";
@@ -108,6 +109,8 @@ public class Session extends AppCompatActivity {
         timer.start();
         running = true;*/
 
+
+        restartSessionButton.setEnabled(true);
 
         i=0;
         selectedAudioStream = new String[2];
@@ -147,6 +150,7 @@ public class Session extends AppCompatActivity {
                     silen.stop();
                 silen.release();
                 silen= null;
+
                 Log.v("silence","silence audio finisged");
                 playOceanAudio();
             }
@@ -264,6 +268,7 @@ public class Session extends AppCompatActivity {
                 if (mediaPlayer != null) {
                     if (mediaPlayer.isPlaying() || oceanMediaPlayer.isPlaying()) {
                         Log.v("songs", "restart accepted");
+                        Toast.makeText(getApplicationContext(),"Session restarted",Toast.LENGTH_LONG).show();
                         counter++;
                         timestamps.add(new Date());
                         //startTimer(v);
@@ -295,6 +300,7 @@ public class Session extends AppCompatActivity {
                             silen.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                                 @Override
                                 public void onCompletion(MediaPlayer mp) {
+
                                     playOceanAudio();
                                 }
                             });
@@ -337,7 +343,7 @@ public class Session extends AppCompatActivity {
                         //mediaPlayer.release();
                         //mediaPlayer = null;
                     } else {
-                        Log.v("songs", "restart refused");
+                        Toast.makeText(getApplicationContext(),"The session can not be restarted because no audio sounds are playing currently",Toast.LENGTH_LONG).show();
                     }
                 }
             }
@@ -492,6 +498,7 @@ public class Session extends AppCompatActivity {
 
     public void playOceanAudio()
     {
+        restartSessionButton.setEnabled(true);
         Log.v("audio","ocean");
         if (oceanMediaPlayer == null)
             oceanMediaPlayer = new MediaPlayer();
