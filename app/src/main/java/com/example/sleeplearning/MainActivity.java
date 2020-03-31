@@ -28,7 +28,7 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity {
     private TextView startButton;
     HashMap<String, Object> responses = new HashMap<>();
-    String language;
+    String language, offset;
     private FirebaseAuth mAuth;
     private FirebaseUser user;
     private FirebaseFirestore database;
@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         user = mAuth.getCurrentUser();
         language = "";
         database = FirebaseFirestore.getInstance();
-
+        offset="";
         //progress dialog
         pd = new ProgressDialog(this);
         pd.setMessage("Loading.....");
@@ -78,11 +78,25 @@ public class MainActivity extends AppCompatActivity {
                         public void onSuccess(DocumentSnapshot documentSnapshot) {
                             UserData userData = documentSnapshot.toObject(UserData.class);
                             Log.v("language",userData.getLanguage());
+                            Log.v("offset", userData.getOffset());
                             language = userData.getLanguage();
+                            if (language.isEmpty()) {
+                                throw new RuntimeException("Empty language");
+                            }
+                            else {
+                                if (!language.equalsIgnoreCase("mandarin")) {
+                                    if (!language.equalsIgnoreCase("arabic")) {
+                                        throw new RuntimeException("bad language entry");
+                                    }
+                                }
+
+                            }
+                            offset = userData.getOffset();
                             pd.dismiss();
                             Intent intent = new Intent(MainActivity.this, Session.class);
                             intent.putExtra("response data", responses);
                             intent.putExtra("user language", language);
+                            intent.putExtra("offset", offset);
 
                             startActivity(intent);
                             finish();

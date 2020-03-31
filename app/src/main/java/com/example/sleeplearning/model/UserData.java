@@ -10,10 +10,13 @@ public class UserData {
     @SerializedName("language")
     @Expose
     private String language;
-
-    public UserData(String ID, String language) {
+    @SerializedName("offset")
+    @Expose
+    private String offset;
+    public UserData(String ID, String language, String offset) {
         this.ID = ID;
         this.language = language;
+        this.offset = offset;
     }
 
     public UserData() {
@@ -27,6 +30,14 @@ public class UserData {
                 "ID='" + ID + '\'' +
                 ", language='" + language + '\'' +
                 '}';
+    }
+
+    public String getOffset() {
+        return offset;
+    }
+
+    public void setOffset(String offset) {
+        this.offset = offset;
     }
 
     public String getID() {

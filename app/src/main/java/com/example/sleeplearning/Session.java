@@ -1,6 +1,7 @@
 package com.example.sleeplearning;
 
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,6 +10,8 @@ import android.media.MediaPlayer;
 import android.net.wifi.WifiManager;
 import android.os.PowerManager;
 import android.os.SystemClock;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.sleeplearning.model.UserData;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -42,11 +46,13 @@ public class Session extends AppCompatActivity {
     public boolean running;
     public long pauseOffset;
     private String timerLimit;
+    private int counter_offset = 1;
     private MediaPlayer silen;
     private  MediaPlayer oceanMediaPlayer = new MediaPlayer();
     private int i = 0;
     private int counter = 0;
     private int x = 0;
+    private String offset;
     private boolean minimize = true;
     private ArrayList<Date> timestamps;
     PowerManager.WakeLock pwakelock;
@@ -54,10 +60,15 @@ public class Session extends AppCompatActivity {
     HashMap<String, Object> responses = new HashMap<>();
     String url = "https://storage.googleapis.com/sleep-learning-app/audio-files/"; // your URL here
     MediaPlayer mediaPlayer = new MediaPlayer();
+    String userId,subjectId;
+    FirebaseFirestore db ;
+
+    ProgressDialog pd;
 
     String ocean = "https://storage.googleapis.com/sleep-learning-app/audio-files/ocean.mp3";
     String silence = "https://storage.googleapis.com/sleep-learning-app/audio-files/20-minutes-of-silence.m4a";
     String fullsilence = "https://storage.googleapis.com/sleep-learning-app/audio-files/40-minutes-of-silence.m4a";
+    String five_minutes_silence = "https://storage.googleapis.com/sleep-learning-app/audio-files/5-minutes-of-silence.m4a";
     String madarinsAudios []={
             "mandarin-1.m4a",
             "mandarin-2.m4a"
@@ -81,6 +92,7 @@ public class Session extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session);
         language = "";
+        offset = "";
         timestamps =  new ArrayList<>();
         //wakelock acquire
          wifiLock = ((WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE))
@@ -90,7 +102,16 @@ public class Session extends AppCompatActivity {
                 "MyApp::MyWakelockTag");
         wakeLock.acquire();
         wifiLock.acquire();
+        mAuth = FirebaseAuth.getInstance();
+        user = mAuth.getCurrentUser();
+        subjectId = "";
 
+        db = FirebaseFirestore.getInstance();
+        pd = new ProgressDialog(this);
+       // pd.setTitle("Thank you for your feedback ");
+        //pd.setMessage("\n Please wait while we are uploading your response to the server ;)");
+        pd.setCancelable(false);
+        pd.setCanceledOnTouchOutside(false);
 
         acquireLock();
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -99,8 +120,68 @@ public class Session extends AppCompatActivity {
         Intent intent = getIntent();
         responses = (HashMap<String, Object>)intent.getSerializableExtra("response data");
         language = (String) intent.getSerializableExtra("user language");
+        offset = (String) intent.getSerializableExtra("offset");
         Log.v("lan",language);
-        responses.put("timeWhenAsleep",new Date());
+       // responses.put("timeWhenAsleep",new Date());
+        // save the time when the user is going to sleep
+
+        if(user!=null)
+        {
+            pd.show();
+            userId= user.getEmail();
+            DocumentReference docRef = db.collection("Subjects").document(userId);
+            Source source = Source.SERVER;
+            docRef.get(source).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    UserData data = documentSnapshot.toObject(UserData.class);
+                    subjectId =data.getID();
+                    Date date = new Date();
+                    SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+                    formatter = new SimpleDateFormat("MMM dd, yyyy");
+                    String strDate = formatter.format(date);
+                    String userResponse = "null";
+                    //userResponse = message.getText().toString();
+
+                    responses.put("timeWhenAsleep",new Date());
+                    HashMap<String, Object> responses_to_save = new HashMap<>();
+                    for (String key : responses.keySet()) {
+                        if (!responses.get(key).equals("NaN"))
+                        {
+                            responses_to_save.put(key,responses.get(key));
+                        }
+                    }
+
+                    db.collection(subjectId).document(strDate).set(responses_to_save).addOnSuccessListener(new OnSuccessListener<Void>() {
+
+                        @Override
+                        public void onSuccess(Void aVoid) {
+
+                            pd.dismiss();
+
+
+                        }
+
+
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                            pd.dismiss();
+                            Toast.makeText(getApplicationContext(),"Check your internet connection",Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    pd.dismiss();
+                    Toast.makeText(getApplicationContext(),"Check your internet connection",Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+
+        //
         endSessionButton = findViewById(R.id.endSessionTxtView);
         restartSessionButton = findViewById(R.id.restartSessionTxtView);
         /*timer = findViewById(R.id.chronometer);
@@ -115,11 +196,11 @@ public class Session extends AppCompatActivity {
         i=0;
         selectedAudioStream = new String[2];
 
-        if (language.equals("Arabic"))
+        if (language.equals("Arabic") || language.equals("arabic"))
         {
             selectedAudioStream = arabicAudio;
         }
-        else if (language.equals("Mandarin"))
+        else if (language.equals("Mandarin") || language.equals("mandarin"))
         {
             selectedAudioStream = madarinsAudios;
         }
@@ -131,8 +212,9 @@ public class Session extends AppCompatActivity {
         silen = new MediaPlayer();
         silen.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         silen.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        counter_offset = 1;
         try {
-            silen.setDataSource(fullsilence);
+            silen.setDataSource(five_minutes_silence);
             silen.prepareAsync();
         } catch (IOException e) {
             e.printStackTrace();
@@ -146,13 +228,32 @@ public class Session extends AppCompatActivity {
         silen.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                if (silen.isPlaying())
-                    silen.stop();
-                silen.release();
-                silen= null;
+                counter_offset++;
 
-                Log.v("silence","silence audio finisged");
-                playOceanAudio();
+
+                if(counter_offset <= Integer.parseInt(offset)/5) {
+                    if (silen.isPlaying())
+                        silen.stop();
+                    silen.reset();
+
+                    Log.v("offset_current",Integer.toString(counter_offset));
+                    if (silen == null)
+                        silen = new MediaPlayer();
+                    try {
+                        silen.setDataSource(five_minutes_silence);
+                        silen.prepareAsync();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else if(counter_offset > Integer.parseInt(offset)) {
+                    if (silen.isPlaying())
+                        silen.stop();
+                    silen.release();
+                    silen = null;
+                    Log.v("silence", "silence audio finished");
+                    playOceanAudio();
+                }
             }
         });
 
@@ -234,15 +335,78 @@ public class Session extends AppCompatActivity {
                         //alertD.show();
                         DateFormat dateFormats = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                         dateFormats.setTimeZone(TimeZone.getTimeZone("UTC"));
-                        responses.put("timeWhenAwake",new Date());
-                        responses.put("numberOfRestarts",counter);
+                        //responses.put("timeWhenAwake",new Date());
+                        // save when the user wake up
+                        if(user!=null)
+                        {
+                            pd.show();
+                            userId= user.getEmail();
+                            DocumentReference docRef = db.collection("Subjects").document(userId);
+                            Source source = Source.SERVER;
+                            docRef.get(source).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                @Override
+                                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                    UserData data = documentSnapshot.toObject(UserData.class);
+                                    subjectId =data.getID();
+                                    Date date = new Date();
+                                    SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+                                    formatter = new SimpleDateFormat("MMM dd, yyyy");
+                                    String strDate = formatter.format(date);
+                                    String userResponse = "null";
+                                    //userResponse = message.getText().toString();
+
+                                    responses.put("timeWhenAwake",new Date());
+                                    HashMap<String, Object> responses_to_save = new HashMap<>();
+                                    for (String key : responses.keySet()) {
+                                        if (!responses.get(key).equals("NaN"))
+                                        {
+                                            responses_to_save.put(key,responses.get(key));
+                                        }
+                                    }
+
+                                    db.collection(subjectId).document(strDate).set(responses_to_save).addOnSuccessListener(new OnSuccessListener<Void>() {
+
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+
+                                            pd.dismiss();
+                                            Intent intent = new Intent(Session.this, FirstQuestion.class);
+                                            intent.putExtra("response data", responses);
+                                            startActivity(intent);
+                                            finish();
+
+
+                                        }
+
+
+                                    }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+
+                                            pd.dismiss();
+                                            Toast.makeText(getApplicationContext(),"Check your internet connection",Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    pd.dismiss();
+                                    Toast.makeText(getApplicationContext(),"Check your internet connection",Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        }
+
+
+                        //
+                        /*responses.put("numberOfRestarts",counter);
                         if(timestamps.size()!=0) {
                             responses.put("timesPressedRestart", timestamps);
-                        }
-                        Intent intent = new Intent(Session.this, FirstQuestion.class);
+                        }*/
+                        /*Intent intent = new Intent(Session.this, FirstQuestion.class);
                         intent.putExtra("response data", responses);
                         startActivity(intent);
-                        finish();
+                        finish();*/
                     }
                 });
                 builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -271,6 +435,71 @@ public class Session extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(),"Session restarted",Toast.LENGTH_LONG).show();
                         counter++;
                         timestamps.add(new Date());
+                        // save restart timestamps and the number of restarts
+
+                        if(user!=null)
+                        {
+                            pd.show();
+                            userId= user.getEmail();
+                            DocumentReference docRef = db.collection("Subjects").document(userId);
+                            Source source = Source.SERVER;
+                            docRef.get(source).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                @Override
+                                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                    UserData data = documentSnapshot.toObject(UserData.class);
+                                    subjectId =data.getID();
+                                    Date date = new Date();
+                                    SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+                                    formatter = new SimpleDateFormat("MMM dd, yyyy");
+                                    String strDate = formatter.format(date);
+                                    String userResponse = "null";
+                                    //userResponse = message.getText().toString();
+
+                                    responses.put("numberOfRestarts",counter);
+                                    if(timestamps.size()!=0) {
+                                        responses.put("timesPressedRestart", timestamps);
+                                    }
+                                    HashMap<String, Object> responses_to_save = new HashMap<>();
+                                    for (String key : responses.keySet()) {
+                                        if (!responses.get(key).equals("NaN"))
+                                        {
+                                            responses_to_save.put(key,responses.get(key));
+                                        }
+                                    }
+
+                                    db.collection(subjectId).document(strDate).set(responses_to_save).addOnSuccessListener(new OnSuccessListener<Void>() {
+
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+
+                                            pd.dismiss();
+
+
+                                        }
+
+
+                                    }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+
+                                            pd.dismiss();
+                                            Toast.makeText(getApplicationContext(),"Check your internet connection",Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    pd.dismiss();
+                                    Toast.makeText(getApplicationContext(),"Check your internet connection",Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        }
+
+
+
+
+                        //
                         //startTimer(v);
                         if (mediaPlayer.isPlaying()) {
                             x = mediaPlayer.getCurrentPosition();
