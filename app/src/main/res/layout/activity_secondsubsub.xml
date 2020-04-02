@@ -34,7 +34,7 @@
             android:id="@+id/messageuserInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="What language if any do you think you heard?"
+            android:text="What language, if any, do you think you heard?"
             android:textColor="#fff"
             android:gravity="center"
             android:textSize="30dp" />
@@ -48,7 +48,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginTop="120dp">
+                android:layout_marginTop="200dp">
             <EditText
                 android:layout_width="match_parent"
                 android:layout_weight="1"

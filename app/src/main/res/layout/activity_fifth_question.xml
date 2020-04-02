@@ -25,14 +25,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Did you have any issue with the Volume of the sound?"
+            android:text="Did you encounter any issue with the app, or do you have any other comments?"
             android:textColor="#fff"
             android:textSize="30dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="120dp"
+            android:layout_marginTop="200dp"
             android:orientation="vertical">
 
             <LinearLayout
