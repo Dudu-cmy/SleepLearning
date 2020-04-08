@@ -213,7 +213,9 @@ public class Session extends AppCompatActivity {
         silen.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         silen.setAudioStreamType(AudioManager.STREAM_MUSIC);
         counter_offset = 1;
+        final int max_counter = Integer.parseInt(offset)/5;
         try {
+            Log.v("start",Integer.toString(counter_offset));
             silen.setDataSource(five_minutes_silence);
             silen.prepareAsync();
         } catch (IOException e) {
@@ -222,6 +224,7 @@ public class Session extends AppCompatActivity {
         silen.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
+                Log.v("start","aaa");
                 silen.start();
             }
         });
@@ -229,9 +232,9 @@ public class Session extends AppCompatActivity {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 counter_offset++;
+                Log.v("start",Integer.toString(counter_offset));
 
-
-                if(counter_offset <= Integer.parseInt(offset)/5) {
+                if(counter_offset <= max_counter) {
                     if (silen.isPlaying())
                         silen.stop();
                     silen.reset();
@@ -246,7 +249,8 @@ public class Session extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
-                else if(counter_offset > Integer.parseInt(offset)) {
+                else if(counter_offset > max_counter) {
+                    Log.v("offset_current","aaaa");
                     if (silen.isPlaying())
                         silen.stop();
                     silen.release();
