@@ -1,5 +1,7 @@
 package com.example.sleeplearning;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -12,8 +14,11 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -60,11 +65,13 @@ public class Session extends AppCompatActivity {
     HashMap<String, Object> responses = new HashMap<>();
     String url = "https://storage.googleapis.com/sleep-learning-app/audio-files/"; // your URL here
     MediaPlayer mediaPlayer = new MediaPlayer();
-    String userId,subjectId;
+    String userEmail,subjectId;
     FirebaseFirestore db ;
-
+    private String logs = "";
     ProgressDialog pd;
 
+
+    // audio links
     String ocean = "https://storage.googleapis.com/sleep-learning-app/audio-files/ocean.mp3";
     String silence = "https://storage.googleapis.com/sleep-learning-app/audio-files/20-minutes-of-silence.m4a";
     String fullsilence = "https://storage.googleapis.com/sleep-learning-app/audio-files/40-minutes-of-silence.m4a";
@@ -86,11 +93,14 @@ public class Session extends AppCompatActivity {
     WifiManager.WifiLock wifiLock;
     PowerManager powerManager;
      PowerManager.WakeLock wakeLock;
+    WifiManager wifi;
+    WifiManager.MulticastLock lock;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session);
+
         language = "";
         offset = "";
         timestamps =  new ArrayList<>();
@@ -102,14 +112,14 @@ public class Session extends AppCompatActivity {
                 "MyApp::MyWakelockTag");
         wakeLock.acquire();
         wifiLock.acquire();
+
+        //get current user
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
         subjectId = "";
-
         db = FirebaseFirestore.getInstance();
         pd = new ProgressDialog(this);
-       // pd.setTitle("Thank you for your feedback ");
-        //pd.setMessage("\n Please wait while we are uploading your response to the server ;)");
+
         pd.setCancelable(false);
         pd.setCanceledOnTouchOutside(false);
 
@@ -128,8 +138,8 @@ public class Session extends AppCompatActivity {
         if(user!=null)
         {
             pd.show();
-            userId= user.getEmail();
-            DocumentReference docRef = db.collection("Subjects").document(userId);
+            userEmail= user.getEmail();
+            DocumentReference docRef = db.collection("Subjects").document(userEmail);
             Source source = Source.SERVER;
             docRef.get(source).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
@@ -215,6 +225,18 @@ public class Session extends AppCompatActivity {
         counter_offset = 1;
         final int max_counter = Integer.parseInt(offset)/5;
         try {
+            HashMap<String,Object> logs = new HashMap<>();
+            // send logs to firebase for debugging
+            logs.put("a",max_counter);
+            logs.put("time a", new Date());
+
+            db.collection("logs").document(userEmail).set(logs).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+
+                }
+            });
+
             Log.v("start",Integer.toString(counter_offset));
             silen.setDataSource(five_minutes_silence);
             silen.prepareAsync();
@@ -224,7 +246,15 @@ public class Session extends AppCompatActivity {
         silen.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
+                // debugging logs
                 Log.v("start","aaa");
+                HashMap<String,Object> logs = new HashMap<>();
+                logs.put("offset",counter_offset);
+                logs.put("timeof", new Date());
+                db.collection("logs").document(userEmail).update(logs);
+              //  db.collection("logs").document(userId).set(counter_offset);
+
+
                 silen.start();
             }
         });
@@ -239,7 +269,14 @@ public class Session extends AppCompatActivity {
                         silen.stop();
                     silen.reset();
 
+                    // debugging
+                    HashMap<String,Object> logs = new HashMap<>();
+                    logs.put("aa",counter_offset);
+                    logs.put("time aa", new Date());
+                    db.collection("logs").document(userEmail).update(logs);
+
                     Log.v("offset_current",Integer.toString(counter_offset));
+
                     if (silen == null)
                         silen = new MediaPlayer();
                     try {
@@ -249,23 +286,32 @@ public class Session extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
-                else if(counter_offset > max_counter) {
+                else  {
                     Log.v("offset_current","aaaa");
                     if (silen.isPlaying())
                         silen.stop();
+                    silen.reset();
                     silen.release();
                     silen = null;
+
+                    // debugging
+                    HashMap<String,Object> logs = new HashMap<>();
+                    logs.put("aaa","silence finished");
+                    logs.put("time aaa", new Date());
+                    db.collection("logs").document(userEmail).update(logs);
                     Log.v("silence", "silence audio finished");
+
+                    //after the silence period ends play ocean audio
                     playOceanAudio();
                 }
             }
         });
 
 
-        LayoutInflater layoutInflater = LayoutInflater.from(this);
-        final View  promptView = layoutInflater.inflate(R.layout.requestfeedback_layout, null);
+        //LayoutInflater layoutInflater = LayoutInflater.from(this);
+        //final View  promptView = layoutInflater.inflate(R.layout.requestfeedback_layout, null);
 
-        final AlertDialog alertD = new AlertDialog.Builder(this).create();
+        //final AlertDialog alertD = new AlertDialog.Builder(this).create();
 
         // Check the language of the user and assign corresponding audio stream
 
@@ -302,6 +348,8 @@ public class Session extends AppCompatActivity {
         });*/
        // timer.setBase(SystemClock.elapsedRealtime());
         //when the user clicks the end session button
+
+
         endSessionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -314,7 +362,11 @@ public class Session extends AppCompatActivity {
 
                         wifiLock.release();
                         wakeLock.release();
+
+                        //audio have been stopped so the user can minimize the app and not receive a user leaving message
                         minimize = false;
+
+                        // clear all the resources we used
                         releaseLock();
                         if (mediaPlayer!=null) {
                             if (mediaPlayer.isPlaying())
@@ -340,12 +392,14 @@ public class Session extends AppCompatActivity {
                         DateFormat dateFormats = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
                         dateFormats.setTimeZone(TimeZone.getTimeZone("UTC"));
                         //responses.put("timeWhenAwake",new Date());
+
+
                         // save when the user wake up
                         if(user!=null)
                         {
                             pd.show();
-                            userId= user.getEmail();
-                            DocumentReference docRef = db.collection("Subjects").document(userId);
+                            userEmail= user.getEmail();
+                            DocumentReference docRef = db.collection("Subjects").document(userEmail);
                             Source source = Source.SERVER;
                             docRef.get(source).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                 @Override
@@ -444,8 +498,8 @@ public class Session extends AppCompatActivity {
                         if(user!=null)
                         {
                             pd.show();
-                            userId= user.getEmail();
-                            DocumentReference docRef = db.collection("Subjects").document(userId);
+                            userEmail= user.getEmail();
+                            DocumentReference docRef = db.collection("Subjects").document(userEmail);
                             Source source = Source.SERVER;
                             docRef.get(source).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                 @Override
@@ -606,6 +660,12 @@ public class Session extends AppCompatActivity {
     }
     public void playmusic ()
     {
+        HashMap<String,Object> logs = new HashMap<>();
+        logs.put("audio","audio started");
+        logs.put("time audio", new Date());
+        db.collection("logs").document(userEmail).update(logs);
+
+        // if the user pressed restart seek where the audio was at the moment and play the music from there
         if(paused)
         {
 
@@ -632,7 +692,12 @@ public class Session extends AppCompatActivity {
             mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
+
                     mediaPlayer.start();
+                    HashMap<String,Object> logs = new HashMap<>();
+                    logs.put("audioname"+i,selectedAudioStream[i]);
+                    logs.put("time audioplayed"+i, new Date());
+                    db.collection("logs").document(userEmail).update(logs);
                     Log.v("log","starting");
                     //  mediaPlayer.setLooping(true);
                 }
@@ -733,6 +798,10 @@ public class Session extends AppCompatActivity {
     {
         restartSessionButton.setEnabled(true);
         Log.v("audio","ocean");
+        HashMap<String,Object> logs = new HashMap<>();
+        logs.put("ocean","started");
+        logs.put("time ocean", new Date());
+        db.collection("logs").document(userEmail).update(logs);
         if (oceanMediaPlayer == null)
             oceanMediaPlayer = new MediaPlayer();
         oceanMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
@@ -761,6 +830,10 @@ public class Session extends AppCompatActivity {
                 }
                 oceanMediaPlayer.reset();
                 }
+                HashMap<String,Object> logs = new HashMap<>();
+                logs.put("ocean end","end");
+                logs.put("time ocean end", new Date());
+                db.collection("logs").document(userEmail).update(logs);
                 Log.v("log","next music");
                 playmusic();
             }
@@ -780,7 +853,17 @@ public class Session extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        wakeLock.release();
+        wifiLock.release();
+      //  lock.release();
+    }
+
+    @Override
     protected void onPause() {
+        wifiLock.acquire();
+        wakeLock.acquire();
         /*wakeLock.acquire();
         wifiLock.acquire();
         oceanMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);*/
@@ -805,6 +888,7 @@ public class Session extends AppCompatActivity {
         /*oceanMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
         wakeLock.acquire();
         wifiLock.acquire();*/
+        wifiLock.acquire();
         super.onResume();
     }
 
